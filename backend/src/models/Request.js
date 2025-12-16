@@ -1,0 +1,74 @@
+const mongoose = require('mongoose');
+
+const requestSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  method: {
+    type: String,
+    enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+    default: 'GET'
+  },
+  url: {
+    type: String,
+    required: true
+  },
+  headers: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  body: {
+    type: String,
+    default: ''
+  },
+  params: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  auth: {
+    type: {
+      type: String,
+      enum: ['none', 'basic', 'bearer', 'api-key'],
+      default: 'none'
+    },
+    username: String,
+    password: String,
+    token: String,
+    apiKey: String
+  },
+  tests: {
+    type: String,
+    default: ''
+  },
+  response: {
+    status: Number,
+    statusText: String,
+    data: mongoose.Schema.Types.Mixed,
+    headers: mongoose.Schema.Types.Mixed,
+    time: Number
+  },
+  collectionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Collection'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Update timestamp on save
+requestSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+module.exports = mongoose.model('Request', requestSchema);
