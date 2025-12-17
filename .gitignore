@@ -36,3 +36,6 @@ coverage/
 
 # Misc
 .turbo
+
+# Repo-specific: ignore AI assistant guide (kept local-only)
+.github/copilot-instructions.md

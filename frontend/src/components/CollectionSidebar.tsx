@@ -27,10 +27,23 @@ export default function CollectionSidebar({ onSelectRequest }: any) {
     try {
       const res = await fetch(`${API_URL}/api/collections`);
       const data = await res.json();
-      setCollections(data);
+      
+      // Ensure data is an array before setting state
+      if (Array.isArray(data)) {
+        setCollections(data);
+      } else {
+        console.error('API returned non-array data:', data);
+        setCollections([]);
+        if (data.error) {
+          toast.error(`Failed to fetch collections: ${data.error}`);
+        } else {
+          toast.error('Failed to fetch collections: Invalid response format');
+        }
+      }
     } catch (error) {
       toast.error('Failed to fetch collections');
       console.error(error);
+      setCollections([]); // Ensure collections remains an array
     }
   };
 
@@ -128,7 +141,7 @@ export default function CollectionSidebar({ onSelectRequest }: any) {
 
       {/* Collections List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {collections.length === 0 ? (
+        {!Array.isArray(collections) || collections.length === 0 ? (
           <div className="text-center text-gray-500 mt-8">
             <p className="text-sm">No collections yet</p>
             <p className="text-xs mt-1">Create one to get started</p>

@@ -3,6 +3,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+// API Testing Platform Backend Server
+
 const app = express();
 
 // Middleware
