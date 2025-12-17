@@ -5,7 +5,9 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "build": "echo 'Backend build complete'",
+    "prod": "NODE_ENV=production node src/server.js"
   },
   "keywords": ["api", "testing", "postman"],
   "author": "",
