@@ -87,7 +87,7 @@ Navigate to: **http://localhost:3000**
 
 ### Can't connect to backend
 - Make sure backend is running on port 5000
-- Visit http://localhost:5000/health in browser
+- Visit https://api-testing-platform.onrender.com/health in browser (or http://localhost:5000/health for local development)
 - Should see: `{"status": "API Testing Backend is running"}`
 
 ## Need Help?

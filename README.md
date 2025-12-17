@@ -287,7 +287,8 @@ vercel login
 vercel --prod
 ```
 
-Remember to update `NEXT_PUBLIC_API_URL` to your deployed backend URL.
+Backend is deployed at: https://api-testing-platform.onrender.com
+Ensure `NEXT_PUBLIC_API_URL` in frontend/.env.local points to this URL.
 
 ## 🎯 Features Coming Soon
 
