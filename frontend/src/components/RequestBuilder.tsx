@@ -25,7 +25,8 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
     if (request) {
       setMethod(request.method || 'GET');
       setUrl(request.url || '');
-      setHeaders(request.headers ? Object.fromEntries(request.headers) : {});
+      // Headers from backend are already plain objects (Mongoose Map serialized to JSON)
+      setHeaders(request.headers instanceof Map ? Object.fromEntries(request.headers) : (request.headers || {}));
       setBody(request.body || '');
       setAuth(request.auth || { type: 'none' });
     }
@@ -380,3 +381,7 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
