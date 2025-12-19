@@ -16,6 +16,10 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
   const [auth, setAuth] = useState<any>({ type: 'none' });
   const [headerInput, setHeaderInput] = useState('');
   const [activeTab, setActiveTab] = useState('headers');
+  const [requestName, setRequestName] = useState('');
+  const [selectedCollectionId, setSelectedCollectionId] = useState('');
+  const [collections, setCollections] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (request) {
@@ -26,6 +30,25 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
       setAuth(request.auth || { type: 'none' });
     }
   }, [request]);
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  const fetchCollections = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/collections`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setCollections(data);
+      } else {
+        setCollections([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch collections:', error);
+      setCollections([]);
+    }
+  };
 
   const handleSendRequest = async () => {
     if (!url.trim()) {
@@ -60,6 +83,49 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
       onResponse({ error: error.message });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveRequest = async () => {
+    if (!requestName.trim()) {
+      toast.error('Please enter a request name');
+      return;
+    }
+
+    if (!url.trim()) {
+      toast.error('Please enter a URL');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/api/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: requestName.trim(),
+          method,
+          url,
+          headers,
+          body: ['POST', 'PUT', 'PATCH'].includes(method) ? body : undefined,
+          auth,
+          collectionId: selectedCollectionId || undefined
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save request');
+      }
+
+      const data = await response.json();
+      toast.success('Request saved successfully!');
+      setRequestName('');
+      setSelectedCollectionId('');
+    } catch (error: any) {
+      toast.error('Failed to save request: ' + error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -115,7 +181,7 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
 
       {/* Tabs */}
       <div className="flex border-b border-gray-700 bg-gray-800">
-        {['headers', 'body', 'auth'].map(tab => (
+        {['headers', 'body', 'auth', 'save'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -264,7 +330,53 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
             )}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
+
+        {activeTab === 'save' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-300">Request Name *</label>
+              <input
+                type="text"
+                value={requestName}
+                onChange={(e) => setRequestName(e.target.value)}
+                placeholder="e.g., Get All Users"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-300">Collection (Optional)</label>
+              {collections.length > 0 ? (
+                <select 
+                  value={selectedCollectionId}
+                  onChange={(e) => setSelectedCollectionId(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="">-- None (Save as standalone) --</option>
+                  {collections.map(col => (
+                    <option key={col._id} value={col._id}>
+                      {col.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="px-3 py-2 bg-gray-800 border border-gray-600 rounded text-gray-400 text-sm">
+                  No collections available. Create one in the sidebar first.
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleSaveRequest}
+              disabled={isSaving || !requestName.trim()}
+              className="w-full px-4 py-2.5 bg-green-600 hover:bg-green-700 rounded font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {isSaving ? 'Saving...' : '💾 Save Request'}
+            </button>
+
+            <div className="bg-blue-900/30 border border-blue-700 rounded p-3 text-sm text-blue-100">
+              <p className="font-medium">💡 Tip:</p>
+              <p className="mt-1">Enter a request name and optionally select a collection to organize your API requests.</p>
+            </div>
+          </div>
+        )}
