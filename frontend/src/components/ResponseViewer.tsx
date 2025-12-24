@@ -1,9 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 
-export default function ResponseViewer({ response, loading }: any) {
+interface ResponseViewerProps {
+  response: any;
+  loading: boolean;
+}
+
+function ResponseViewer({ response, loading }: ResponseViewerProps) {
   const [activeTab, setActiveTab] = useState('body');
+
+  // Memoize status color calculation
+  const getStatusColor = useMemo(() => {
+    if (!response || !response.status) return 'text-gray-400 bg-gray-700';
+    const status = response.status;
+    if (status >= 200 && status < 300) return 'text-green-400 bg-green-900/30';
+    if (status >= 300 && status < 400) return 'text-blue-400 bg-blue-900/30';
+    if (status >= 400 && status < 500) return 'text-yellow-400 bg-yellow-900/30';
+    if (status >= 500) return 'text-red-400 bg-red-900/30';
+    return 'text-gray-400 bg-gray-700';
+  }, [response?.status]);
+
+  // Memoize formatted JSON body
+  const formattedBody = useMemo(() => {
+    if (!response || !response.data) return null;
+    if (typeof response.data === 'object') {
+      return JSON.stringify(response.data, null, 2);
+    }
+    return response.data?.toString() || 'No response body';
+  }, [response?.data]);
 
   if (loading) {
     return (
@@ -54,14 +79,6 @@ export default function ResponseViewer({ response, loading }: any) {
     );
   }
 
-  const getStatusColor = (status: number) => {
-    if (status >= 200 && status < 300) return 'text-green-400 bg-green-900/30';
-    if (status >= 300 && status < 400) return 'text-blue-400 bg-blue-900/30';
-    if (status >= 400 && status < 500) return 'text-yellow-400 bg-yellow-900/30';
-    if (status >= 500) return 'text-red-400 bg-red-900/30';
-    return 'text-gray-400 bg-gray-700';
-  };
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
       {/* Status Bar */}
@@ -69,7 +86,7 @@ export default function ResponseViewer({ response, loading }: any) {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">Status:</span>
-            <span className={`px-3 py-1 rounded font-semibold ${getStatusColor(response.status)}`}>
+            <span className={`px-3 py-1 rounded font-semibold ${getStatusColor}`}>
               {response.status} {response.statusText}
             </span>
           </div>
@@ -103,15 +120,9 @@ export default function ResponseViewer({ response, loading }: any) {
       <div className="flex-1 overflow-auto p-6">
         {activeTab === 'body' && (
           <div>
-            {typeof response.data === 'object' ? (
-              <pre className="text-sm text-gray-300 font-mono bg-gray-800 p-4 rounded border border-gray-700 overflow-auto">
-                {JSON.stringify(response.data, null, 2)}
-              </pre>
-            ) : (
-              <div className="text-sm text-gray-300 bg-gray-800 p-4 rounded border border-gray-700">
-                {response.data?.toString() || 'No response body'}
-              </div>
-            )}
+            <pre className="text-sm text-gray-300 font-mono bg-gray-800 p-4 rounded border border-gray-700 overflow-auto">
+              {formattedBody}
+            </pre>
           </div>
         )}
 
@@ -137,3 +148,6 @@ export default function ResponseViewer({ response, loading }: any) {
     </div>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(ResponseViewer);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import toast from 'react-hot-toast';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -8,7 +8,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
 const authTypes = ['none', 'basic', 'bearer', 'api-key'];
 
-export default function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: any) {
+interface RequestBuilderProps {
+  request: any;
+  onResponse: (response: any) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+}
+
+function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: RequestBuilderProps) {
   const [method, setMethod] = useState('GET');
   const [url, setUrl] = useState('https://jsonplaceholder.typicode.com/posts');
   const [headers, setHeaders] = useState<Record<string, string>>({});
@@ -36,7 +43,7 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
     fetchCollections();
   }, []);
 
-  const fetchCollections = async () => {
+  const fetchCollections = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/collections`);
       const data = await res.json();
@@ -49,9 +56,9 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
       console.error('Failed to fetch collections:', error);
       setCollections([]);
     }
-  };
+  }, []);
 
-  const handleSendRequest = async () => {
+  const handleSendRequest = useCallback(async () => {
     if (!url.trim()) {
       toast.error('Please enter a URL');
       return;
@@ -85,9 +92,9 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [method, url, headers, body, auth, onResponse, setIsLoading]);
 
-  const handleSaveRequest = async () => {
+  const handleSaveRequest = useCallback(async () => {
     if (!requestName.trim()) {
       toast.error('Please enter a request name');
       return;
@@ -128,9 +135,9 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [requestName, url, method, headers, body, auth, selectedCollectionId]);
 
-  const addHeader = () => {
+  const addHeader = useCallback(() => {
     const [key, value] = headerInput.split(':').map(s => s.trim());
     if (key && value) {
       setHeaders({ ...headers, [key]: value });
@@ -138,13 +145,13 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
     } else {
       toast.error('Invalid header format. Use Key: Value');
     }
-  };
+  }, [headerInput, headers]);
 
-  const removeHeader = (key: string) => {
+  const removeHeader = useCallback((key: string) => {
     const newHeaders = { ...headers };
     delete newHeaders[key];
     setHeaders(newHeaders);
-  };
+  }, [headers]);
 
   return (
     <div className="border-b border-gray-700 bg-gray-900">
@@ -385,3 +392,6 @@ export default function RequestBuilder({ request, onResponse, isLoading, setIsLo
     </div>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(RequestBuilder);

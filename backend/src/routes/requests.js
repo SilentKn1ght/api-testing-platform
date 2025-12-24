@@ -1,12 +1,15 @@
 const express = require('express');
 const Request = require('../models/Request');
 const Collection = require('../models/Collection');
+const cacheMiddleware = require('../middleware/cache');
 const router = express.Router();
 
-// Get all requests
-router.get('/', async (req, res) => {
+// Get all requests (with caching for 2 minutes)
+router.get('/', cacheMiddleware(120000), async (req, res) => {
   try {
-    const requests = await Request.find().sort({ updatedAt: -1 });
+    const requests = await Request.find()
+      .sort({ updatedAt: -1 })
+      .lean(); // Convert to plain JS objects for better performance
     res.json(requests);
   } catch (error) {
     console.error('Error fetching requests:', error);
@@ -56,10 +59,11 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get single request
-router.get('/:id', async (req, res) => {
+// Get single request (with caching for 2 minutes)
+router.get('/:id', cacheMiddleware(120000), async (req, res) => {
   try {
-    const request = await Request.findById(req.params.id);
+    const request = await Request.findById(req.params.id)
+      .lean(); // Convert to plain JS objects for better performance
     
     if (!request) {
       return res.status(404).json({ error: 'Request not found' });
@@ -120,11 +124,12 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Get requests by collection
-router.get('/collection/:collectionId', async (req, res) => {
+// Get requests by collection (with caching for 2 minutes)
+router.get('/collection/:collectionId', cacheMiddleware(120000), async (req, res) => {
   try {
     const requests = await Request.find({ collectionId: req.params.collectionId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // Convert to plain JS objects for better performance
     res.json(requests);
   } catch (error) {
     console.error('Error fetching requests:', error);

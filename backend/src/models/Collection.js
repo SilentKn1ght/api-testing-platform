@@ -30,4 +30,8 @@ collectionSchema.pre('save', function(next) {
   next();
 });
 
+// Indexes for performance
+collectionSchema.index({ updatedAt: -1 });
+collectionSchema.index({ name: 1 });
+
 module.exports = mongoose.model('Collection', collectionSchema);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import RequestBuilder from '@/components/RequestBuilder';
 import ResponseViewer from '@/components/ResponseViewer';
 import CollectionSidebar from '@/components/CollectionSidebar';
@@ -10,10 +10,23 @@ export default function Home() {
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  // Memoize callbacks to prevent unnecessary re-renders of child components
+  const handleSelectRequest = useCallback((request: any) => {
+    setActiveRequest(request);
+  }, []);
+
+  const handleResponse = useCallback((responseData: any) => {
+    setResponse(responseData);
+  }, []);
+
+  const handleSetLoading = useCallback((isLoading: boolean) => {
+    setLoading(isLoading);
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
       {/* Sidebar */}
-      <CollectionSidebar onSelectRequest={setActiveRequest} />
+      <CollectionSidebar onSelectRequest={handleSelectRequest} />
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -35,9 +48,9 @@ export default function Home() {
         {/* Request Builder */}
         <RequestBuilder 
           request={activeRequest}
-          onResponse={setResponse}
+          onResponse={handleResponse}
           isLoading={loading}
-          setIsLoading={setLoading}
+          setIsLoading={handleSetLoading}
         />
 
         {/* Response Viewer */}

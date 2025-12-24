@@ -71,4 +71,9 @@ requestSchema.pre('save', function(next) {
   next();
 });
 
+// Indexes for performance
+requestSchema.index({ updatedAt: -1 });
+requestSchema.index({ collectionId: 1 });
+requestSchema.index({ name: 1 });
+
 module.exports = mongoose.model('Request', requestSchema);

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import toast from 'react-hot-toast';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -13,17 +14,21 @@ interface Collection {
   createdAt: string;
 }
 
-export default function CollectionSidebar({ onSelectRequest }: any) {
+interface CollectionSidebarProps {
+  onSelectRequest: (request: any) => void;
+}
+
+function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [newCollectionName, setNewCollectionName] = useState('');
-  const [expandedCollections, setExpandedCollections] = useState<Record<string, boolean>>({});
+  const [expandedCollections, setExpandedCollections] = useLocalStorage<Record<string, boolean>>('expandedCollections', {});
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchCollections();
   }, []);
 
-  const fetchCollections = async () => {
+  const fetchCollections = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/collections`);
       const data = await res.json();
@@ -45,9 +50,9 @@ export default function CollectionSidebar({ onSelectRequest }: any) {
       console.error(error);
       setCollections([]); // Ensure collections remains an array
     }
-  };
+  }, []);
 
-  const handleCreateCollection = async () => {
+  const handleCreateCollection = useCallback(async () => {
     if (!newCollectionName.trim()) {
       toast.error('Please enter a collection name');
       return;
@@ -69,9 +74,9 @@ export default function CollectionSidebar({ onSelectRequest }: any) {
       toast.error('Failed to create collection');
       console.error(error);
     }
-  };
+  }, [collections, newCollectionName]);
 
-  const handleDeleteCollection = async (id: string) => {
+  const handleDeleteCollection = useCallback(async (id: string) => {
     if (!confirm('Are you sure you want to delete this collection?')) return;
     
     try {
@@ -85,14 +90,14 @@ export default function CollectionSidebar({ onSelectRequest }: any) {
       toast.error('Failed to delete collection');
       console.error(error);
     }
-  };
+  }, [collections]);
 
-  const toggleCollection = (id: string) => {
+  const toggleCollection = useCallback((id: string) => {
     setExpandedCollections({
       ...expandedCollections,
       [id]: !expandedCollections[id]
     });
-  };
+  }, [expandedCollections, setExpandedCollections]);
 
   return (
     <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col overflow-hidden">
@@ -209,3 +214,6 @@ export default function CollectionSidebar({ onSelectRequest }: any) {
     </div>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(CollectionSidebar);

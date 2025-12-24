@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const compression = require('compression');
 require('dotenv').config();
 
 // API Testing Platform Backend Server
@@ -9,6 +10,7 @@ const app = express();
 
 // Middleware
 app.use(cors());
+app.use(compression()); // Enable gzip compression
 app.use(express.json({ limit: '50mb' }));
 
 // Connect MongoDB
