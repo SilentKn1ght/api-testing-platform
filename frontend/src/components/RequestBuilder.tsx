@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback, memo } from 'react';
 import toast from 'react-hot-toast';
+import type { RequestDocument, ApiResult, AuthConfig, AuthType } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
 const authTypes = ['none', 'basic', 'bearer', 'api-key'];
 
 interface RequestBuilderProps {
-  request: any;
-  onResponse: (response: any) => void;
+  request: RequestDocument | null;
+  onResponse: (response: ApiResult) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
 }
@@ -20,7 +21,7 @@ function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: Reques
   const [url, setUrl] = useState('https://jsonplaceholder.typicode.com/posts');
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [body, setBody] = useState('');
-  const [auth, setAuth] = useState<any>({ type: 'none' });
+  const [auth, setAuth] = useState<AuthConfig>({ type: 'none' });
   const [headerInput, setHeaderInput] = useState('');
   const [activeTab, setActiveTab] = useState('headers');
   const [requestName, setRequestName] = useState('');
@@ -271,7 +272,7 @@ function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: Reques
               <label className="block text-sm font-medium mb-2 text-gray-300">Auth Type</label>
               <select 
                 value={auth.type}
-                onChange={(e) => setAuth({ type: e.target.value })}
+                onChange={(e) => setAuth({ type: e.target.value as AuthType })}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 {authTypes.map(a => (

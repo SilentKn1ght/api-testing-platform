@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
 import { useState, useMemo, memo } from 'react';
+import type { ApiResult } from '../types';
 
 interface ResponseViewerProps {
-  response: any;
+  response: ApiResult | null;
   loading: boolean;
 }
 

@@ -1,19 +1,14 @@
-'use client';
-
 import { useState, useCallback } from 'react';
 import { Toaster } from 'react-hot-toast';
-import RequestBuilder from '@/components/RequestBuilder';
-import ResponseViewer from '@/components/ResponseViewer';
-import CollectionSidebar from '@/components/CollectionSidebar';
-import type { RequestDocument, ApiResult } from '../types';
+import RequestBuilder from './components/RequestBuilder';
+import ResponseViewer from './components/ResponseViewer';
+import CollectionSidebar from './components/CollectionSidebar';
+import type { RequestDocument, ApiResult } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-export default function Home() {
+function App() {
   const [activeRequest, setActiveRequest] = useState<RequestDocument | null>(null);
   const [response, setResponse] = useState<ApiResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [connected, setConnected] = useState<boolean>(false);
 
   // Memoize callbacks to prevent unnecessary re-renders of child components
   const handleSelectRequest = useCallback((request: RequestDocument) => {
@@ -27,21 +22,6 @@ export default function Home() {
   const handleSetLoading = useCallback((isLoading: boolean) => {
     setLoading(isLoading);
   }, []);
-
-  // Backend health check
-  const checkHealth = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_URL}/health`);
-      const data = await res.json();
-      setConnected(Boolean(data && data.status));
-    } catch (err) {
-      setConnected(false);
-    }
-  }, []);
-
-  // Initial health check on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { checkHealth(); }, []);
 
   return (
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
@@ -58,15 +38,9 @@ export default function Home() {
               <p className="text-sm text-gray-400 mt-1">Build, test, and document your APIs</p>
             </div>
             <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${connected ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
-                {connected ? 'Connected' : 'Disconnected'}
+              <span className="px-3 py-1 bg-green-900/30 text-green-400 rounded-full text-xs font-semibold">
+                Connected
               </span>
-              <button
-                onClick={checkHealth}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                Refresh
-              </button>
             </div>
           </div>
         </header>
@@ -110,3 +84,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default App;

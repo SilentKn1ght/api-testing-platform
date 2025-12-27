@@ -1,18 +1,13 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback, memo } from 'react';
 import toast from 'react-hot-toast';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import type { Collection } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-interface Collection {
-  _id: string;
-  name: string;
-  description: string;
-  requests: any[];
-  createdAt: string;
-}
+// Use shared Collection type from types.ts
 
 interface CollectionSidebarProps {
   onSelectRequest: (request: any) => void;
