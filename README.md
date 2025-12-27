@@ -214,25 +214,11 @@ api-testing-platform/
 ### Execute
 - `POST /api/execute` - Execute an HTTP request
 
-## 🧪 Testing the Application
+## 🧪 Quick Test Examples
 
-### Test with Public APIs
-
-Here are some free public APIs you can test with:
-
-1. **JSONPlaceholder** (No auth required)
-   - GET: `https://jsonplaceholder.typicode.com/posts`
-   - POST: `https://jsonplaceholder.typicode.com/posts`
-   - Body: `{"title": "Test", "body": "Content", "userId": 1}`
-
-2. **ReqRes** (User API)
-   - GET: `https://reqres.in/api/users?page=1`
-   - POST: `https://reqres.in/api/users`
-   - Body: `{"name": "John", "job": "Developer"}`
-
-3. **REST Countries**
-   - GET: `https://restcountries.com/v3.1/all`
-   - GET: `https://restcountries.com/v3.1/name/india`
+Try these public APIs to get started:
+- **GET**: `https://jsonplaceholder.typicode.com/posts`
+- **POST**: `https://jsonplaceholder.typicode.com/posts` with body: `{"title": "Test", "body": "Content", "userId": 1}`
 
 ## 🐛 Troubleshooting
 
@@ -290,43 +276,10 @@ vercel --prod
 Backend is deployed at: https://api-testing-platform.onrender.com
 Ensure `NEXT_PUBLIC_API_URL` in frontend/.env.local points to this URL.
 
-## 🎯 Features Coming Soon
-
-- [ ] Request history tracking
-- [ ] Environment variables
-- [ ] Test scripts and assertions
-- [ ] OpenAPI/Swagger import/export
-- [ ] Team collaboration
-- [ ] API documentation generation
-- [ ] Code generation for various languages
-- [ ] Mock servers
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## 📝 License
 
-This project is open source and available under the MIT License.
-
-## 💡 Tips for Portfolio
-
-This project demonstrates:
-- ✅ Full-stack development (Next.js + Node.js)
-- ✅ TypeScript proficiency
-- ✅ RESTful API design
-- ✅ MongoDB database operations
-- ✅ Modern UI/UX with Tailwind CSS
-- ✅ State management
-- ✅ Error handling
-- ✅ Real-world application development
-
-Perfect for showcasing your skills to potential employers!
-
-## 📧 Support
-
-If you encounter any issues or have questions, please open an issue on GitHub.
+MIT License - see LICENSE file for details.
 
 ---
 
-**Built with ❤️ using Next.js, TypeScript, Node.js, and MongoDB**
+**Built with Next.js, TypeScript, Node.js, Express, and MongoDB**
