@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo } from 'react';
 
 interface ResponseViewerProps {
   response: any;
@@ -149,5 +149,4 @@ function ResponseViewer({ response, loading }: ResponseViewerProps) {
   );
 }
 
-// Memoize component to prevent unnecessary re-renders
-export default memo(ResponseViewer);
+export default ResponseViewer;

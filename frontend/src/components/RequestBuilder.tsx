@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -393,5 +393,4 @@ function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: Reques
   );
 }
 
-// Memoize component to prevent unnecessary re-renders
-export default memo(RequestBuilder);
+export default RequestBuilder;

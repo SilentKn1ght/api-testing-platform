@@ -7,19 +7,20 @@ import { useState, useEffect } from 'react';
  * @returns [value, setValue] tuple similar to useState
  */
 export function useLocalStorage<T>(key: string, initialValue: T) {
-  // Get initial value from localStorage or use provided initialValue
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
+  // Always start with initialValue to prevent SSR/hydration mismatch
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+
+  // Read from localStorage after component mounts (client-side only)
+  useEffect(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        setStoredValue(JSON.parse(item));
+      }
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
     }
-  });
+  }, [key]);
 
   // Update localStorage when value changes
   const setValue = (value: T | ((val: T) => T)) => {

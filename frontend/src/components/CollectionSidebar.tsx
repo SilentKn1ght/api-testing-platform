@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -215,5 +215,4 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
   );
 }
 
-// Memoize component to prevent unnecessary re-renders
-export default memo(CollectionSidebar);
+export default CollectionSidebar;
