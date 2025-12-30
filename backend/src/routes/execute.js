@@ -2,13 +2,27 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
+// Validate URL format
+function isValidUrl(urlString) {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 // Execute API request
 router.post('/', async (req, res) => {
   try {
     const { method, url, headers = {}, body, auth, params } = req.body;
     
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       return res.status(400).json({ error: 'URL is required' });
+    }
+    
+    if (!isValidUrl(url)) {
+      return res.status(400).json({ error: 'Invalid URL format' });
     }
 
     // Prepare auth if provided
@@ -47,10 +61,21 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Request execution error:', error);
-    res.status(500).json({
-      error: error.message,
-      details: error.response?.data || 'Request failed'
-    });
+    // Sanitize error response - don't expose internal details
+    const errorResponse = {
+      error: 'Request failed'
+    };
+    
+    // Only include safe error details
+    if (error.code === 'ENOTFOUND') {
+      errorResponse.error = 'Host not found. Check the URL.';
+    } else if (error.code === 'ECONNREFUSED') {
+      errorResponse.error = 'Connection refused. Server may be down.';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorResponse.error = 'Request timeout. Server took too long to respond.';
+    }
+    
+    res.status(500).json(errorResponse);
   }
 });
 

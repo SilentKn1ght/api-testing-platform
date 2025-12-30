@@ -70,11 +70,13 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       setNewCollectionName('');
       setIsCreating(false);
       toast.success('Collection created!');
+      // Invalidate cache by refetching
+      fetchCollections();
     } catch (error) {
       toast.error('Failed to create collection');
       console.error(error);
     }
-  }, [collections, newCollectionName]);
+  }, [collections, newCollectionName, fetchCollections]);
 
   const handleDeleteCollection = useCallback(async (id: string) => {
     if (!confirm('Are you sure you want to delete this collection?')) return;
@@ -86,11 +88,13 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       
       setCollections(collections.filter(c => c._id !== id));
       toast.success('Collection deleted');
+      // Invalidate cache by refetching
+      fetchCollections();
     } catch (error) {
       toast.error('Failed to delete collection');
       console.error(error);
     }
-  }, [collections]);
+  }, [collections, fetchCollections]);
 
   const toggleCollection = useCallback((id: string) => {
     setExpandedCollections({

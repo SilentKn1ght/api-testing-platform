@@ -14,22 +14,30 @@ app.use(compression()); // Enable gzip compression
 app.use(express.json({ limit: '50mb' }));
 
 // Connect MongoDB
+let mongoConnected = false;
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB error:', err));
+  .then(() => {
+    mongoConnected = true;
+    console.log('✅ MongoDB connected');
+  })
+  .catch(err => {
+    console.error('❌ MongoDB error:', err);
+    console.error('Server starting without database connection - requests will fail');
+  });
+
+// Health check includes DB status
+app.get('/health', (req, res) => {
+  res.status(mongoConnected ? 200 : 503).json({ 
+    status: 'API Testing Backend is running',
+    database: mongoConnected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Routes
 app.use('/api/collections', require('./routes/collections'));
 app.use('/api/requests', require('./routes/requests'));
 app.use('/api/execute', require('./routes/execute'));
-
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'API Testing Backend is running',
-    timestamp: new Date().toISOString()
-  });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

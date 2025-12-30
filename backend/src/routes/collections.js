@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', cacheMiddleware(120000), async (req, res) => {
   try {
     const collections = await Collection.find()
-      .populate('requests')
+      .select('-requests') // Exclude requests to avoid N+1 query
       .sort({ updatedAt: -1 })
       .lean(); // Convert to plain JS objects for better performance
     res.json(collections);
@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', cacheMiddleware(120000), async (req, res) => {
   try {
     const collection = await Collection.findById(req.params.id)
-      .populate('requests')
+      .populate('requests') // Populate requests for detail view
       .lean(); // Convert to plain JS objects for better performance
     
     if (!collection) {

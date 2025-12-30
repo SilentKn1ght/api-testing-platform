@@ -130,12 +130,14 @@ function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: Reques
       toast.success('Request saved successfully!');
       setRequestName('');
       setSelectedCollectionId('');
+      // Invalidate collections cache by refetching
+      fetchCollections();
     } catch (error: any) {
       toast.error('Failed to save request: ' + error.message);
     } finally {
       setIsSaving(false);
     }
-  }, [requestName, url, method, headers, body, auth, selectedCollectionId]);
+  }, [requestName, url, method, headers, body, auth, selectedCollectionId, fetchCollections]);
 
   const addHeader = useCallback(() => {
     const [key, value] = headerInput.split(':').map(s => s.trim());
