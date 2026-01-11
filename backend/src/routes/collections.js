@@ -2,6 +2,7 @@ const express = require('express');
 const Collection = require('../models/Collection');
 const Request = require('../models/Request');
 const cacheMiddleware = require('../middleware/cache');
+const { invalidateResourceCache } = require('../middleware/cache');
 const router = express.Router();
 
 // Get all collections (with caching for 2 minutes)
@@ -33,6 +34,11 @@ router.post('/', async (req, res) => {
     });
     
     await collection.save();
+    
+    // Invalidate collections cache after creating new collection
+    invalidateResourceCache('collections');
+    console.log('📦 Cache invalidated: Collections list updated');
+    
     res.status(201).json(collection);
   } catch (error) {
     console.error('Error creating collection:', error);
@@ -77,6 +83,10 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Collection not found' });
     }
     
+    // Invalidate collection caches after update
+    invalidateResourceCache('collections');
+    console.log(`📦 Cache invalidated: Collection ${req.params.id} updated`);
+    
     res.json(collection);
   } catch (error) {
     console.error('Error updating collection:', error);
@@ -97,6 +107,11 @@ router.delete('/:id', async (req, res) => {
     await Request.deleteMany({ collectionId: req.params.id });
     
     await Collection.findByIdAndDelete(req.params.id);
+    
+    // Invalidate related caches after deletion
+    invalidateResourceCache('collections');
+    invalidateResourceCache('requests');
+    console.log(`📦 Cache invalidated: Collection ${req.params.id} and related requests deleted`);
     
     res.json({ message: 'Collection deleted successfully' });
   } catch (error) {

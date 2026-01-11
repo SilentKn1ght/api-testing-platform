@@ -2,6 +2,7 @@ const express = require('express');
 const Request = require('../models/Request');
 const Collection = require('../models/Collection');
 const cacheMiddleware = require('../middleware/cache');
+const { invalidateResourceCache } = require('../middleware/cache');
 const router = express.Router();
 
 // Get all requests (with caching for 2 minutes)
@@ -52,6 +53,11 @@ router.post('/', async (req, res) => {
       );
     }
     
+    // Invalidate requests and collections caches after creating new request
+    invalidateResourceCache('requests');
+    invalidateResourceCache('collections');
+    console.log('📋 Cache invalidated: Requests list and collections updated');
+    
     res.status(201).json(request);
   } catch (error) {
     console.error('Error creating request:', error);
@@ -91,6 +97,11 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Request not found' });
     }
     
+    // Invalidate requests and collections caches after update
+    invalidateResourceCache('requests');
+    invalidateResourceCache('collections');
+    console.log(`📋 Cache invalidated: Request ${req.params.id} updated`);
+    
     res.json(request);
   } catch (error) {
     console.error('Error updating request:', error);
@@ -116,6 +127,11 @@ router.delete('/:id', async (req, res) => {
     }
     
     await Request.findByIdAndDelete(req.params.id);
+    
+    // Invalidate requests and collections caches after deletion
+    invalidateResourceCache('requests');
+    invalidateResourceCache('collections');
+    console.log(`📋 Cache invalidated: Request ${req.params.id} deleted`);
     
     res.json({ message: 'Request deleted successfully' });
   } catch (error) {

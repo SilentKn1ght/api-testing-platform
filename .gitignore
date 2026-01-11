@@ -39,3 +39,4 @@ coverage/
 
 # Repo-specific: ignore AI assistant guide (kept local-only)
 .github/copilot-instructions.md
+backend/scripts/check-db.js
