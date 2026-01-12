@@ -1,134 +1,60 @@
-# Example API Requests to Test
+# Example API Requests
 
-Copy and paste these examples into your API Testing Platform to get started!
+Test these free public APIs with the platform!
 
-## 1. JSONPlaceholder - Get All Posts
+## Get Requests
 
-**Method:** GET  
-**URL:** `https://jsonplaceholder.typicode.com/posts`  
-**Description:** Retrieves a list of all blog posts
+| Description | Method | URL |
+|-------------|--------|-----|
+| All posts (JSONPlaceholder) | GET | `https://jsonplaceholder.typicode.com/posts` |
+| Single post | GET | `https://jsonplaceholder.typicode.com/posts/1` |
+| Users (ReqRes) | GET | `https://reqres.in/api/users?page=1` |
+| All countries | GET | `https://restcountries.com/v3.1/all` |
+| Country search | GET | `https://restcountries.com/v3.1/name/india` |
+| GitHub user | GET | `https://api.github.com/users/github` |
+| Random cat fact | GET | `https://catfact.ninja/fact` |
+| Random dog image | GET | `https://dog.ceo/api/breeds/image/random` |
 
----
+## Post Requests
 
-## 2. JSONPlaceholder - Get Single Post
-
-**Method:** GET  
-**URL:** `https://jsonplaceholder.typicode.com/posts/1`  
-**Description:** Retrieves a specific post by ID
-
----
-
-## 3. JSONPlaceholder - Create Post
-
-**Method:** POST  
-**URL:** `https://jsonplaceholder.typicode.com/posts`  
-**Headers:**
+**Create Post (JSONPlaceholder)**
 ```
-Content-Type: application/json
-```
-**Body:**
-```json
+Method: POST
+URL: https://jsonplaceholder.typicode.com/posts
+Headers: Content-Type: application/json
+Body:
 {
-  "title": "My New Post",
-  "body": "This is the content of my post",
+  "title": "My Post",
+  "body": "Content here",
   "userId": 1
 }
 ```
 
----
-
-## 4. ReqRes - Get Users
-
-**Method:** GET  
-**URL:** `https://reqres.in/api/users?page=1`  
-**Description:** Get list of users with pagination
-
----
-
-## 5. ReqRes - Create User
-
-**Method:** POST  
-**URL:** `https://reqres.in/api/users`  
-**Headers:**
+**Create User (ReqRes)**
 ```
-Content-Type: application/json
-```
-**Body:**
-```json
+Method: POST
+URL: https://reqres.in/api/users
+Headers: Content-Type: application/json
+Body:
 {
   "name": "John Doe",
-  "job": "Software Developer"
+  "job": "Developer"
 }
 ```
 
----
+## Status Code Testing
 
-## 6. REST Countries - Get All Countries
+Test error responses with [httpstat.us](https://httpstat.us):
 
-**Method:** GET  
-**URL:** `https://restcountries.com/v3.1/all`  
-**Description:** Get information about all countries
-
----
-
-## 7. REST Countries - Search by Name
-
-**Method:** GET  
-**URL:** `https://restcountries.com/v3.1/name/india`  
-**Description:** Search for a specific country
-
----
-
-## 8. GitHub API - Get User
-
-**Method:** GET  
-**URL:** `https://api.github.com/users/github`  
-**Headers:**
 ```
-Accept: application/vnd.github.v3+json
+GET https://httpstat.us/200   (Success)
+GET https://httpstat.us/404   (Not Found)
+GET https://httpstat.us/500   (Server Error)
 ```
-**Description:** Get GitHub user information
-
----
-
-## 9. Cat Facts API
-
-**Method:** GET  
-**URL:** `https://catfact.ninja/fact`  
-**Description:** Get a random cat fact
-
----
-
-## 10. Dog API - Random Dog Image
-
-**Method:** GET  
-**URL:** `https://dog.ceo/api/breeds/image/random`  
-**Description:** Get a random dog image URL
-
----
-
-## Testing Different Status Codes
-
-### Success (200)
-**Method:** GET  
-**URL:** `https://httpstat.us/200`
-
-### Not Found (404)
-**Method:** GET  
-**URL:** `https://httpstat.us/404`
-
-### Server Error (500)
-**Method:** GET  
-**URL:** `https://httpstat.us/500`
-
----
 
 ## Tips
 
-1. **Save your requests** by creating collections
-2. **Try different HTTP methods** (GET, POST, PUT, DELETE)
-3. **Experiment with headers** - add custom headers to see how APIs respond
-4. **Test authentication** - some APIs require API keys or bearer tokens
-5. **Check response times** - see how fast different APIs respond
-
-Have fun testing! 🚀
+- Save requests in collections for later use
+- Try different HTTP methods (GET, POST, PUT, DELETE)
+- Add custom headers to experiment with APIs
+- Check response times in the status bar

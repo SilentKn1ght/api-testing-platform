@@ -1,95 +1,60 @@
 # Quick Start Guide
 
-Get your API Testing Platform running in 5 minutes!
+Get the platform running in 5 minutes!
 
-## Step 1: Install Dependencies
+## Step 1: Clone & Install
 
-### Backend
 ```bash
-cd backend
-npm install
+cd api-testing-platform
+pnpm install
 ```
 
-### Frontend
-```bash
-cd frontend
-npm install
-```
+## Step 2: Configure MongoDB
 
-## Step 2: Start MongoDB
+**Option A: Cloud (Easiest)**
+- Create free account at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
+- Create M0 cluster, get connection string
+- Add to `backend/.env`: `MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/api-testing`
 
-**Option A: Local MongoDB**
-- Windows: Start MongoDB service from Services app
+**Option B: Local**
+- Windows: `net start MongoDB`
 - Mac: `brew services start mongodb-community`
 - Linux: `sudo systemctl start mongod`
+- Then `backend/.env`: `MONGODB_URI=mongodb://localhost:27017/api-testing`
 
-**Option B: MongoDB Atlas (Easier)**
-- Go to [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
-- Sign up for free
-- Create a cluster
-- Get connection string
-- Update `backend/.env` with your connection string
+## Step 3: Start Services
 
-## Step 3: Start Backend
-
+**Terminal 1:**
 ```bash
-cd backend
-npm run dev
+cd backend && pnpm run dev
 ```
+Expected: `✅ MongoDB connected`, `🚀 Server on http://localhost:5000`
 
-Expected output:
-```
-✅ MongoDB connected
-🚀 Server running on http://localhost:5000
-```
-
-## Step 4: Start Frontend
-
-Open a NEW terminal:
-
+**Terminal 2:**
 ```bash
-cd frontend
-npm run dev
+cd frontend && pnpm run dev
 ```
+Expected: `✓ Ready at http://localhost:3000`
 
-Expected output:
-```
-✓ Ready in 2.5s
-○ Local: http://localhost:3000
-```
+## Step 4: Test
 
-## Step 5: Open Browser
-
-Navigate to: **http://localhost:3000**
-
-## Step 6: Test It Out
-
-1. Click **"+ New Collection"**
-2. Name it "Test Collection"
-3. In the main area, enter this URL:
-   ```
-   https://jsonplaceholder.typicode.com/posts
-   ```
-4. Click **"Send"**
-5. See the response! 🎉
+1. Open http://localhost:3000
+2. Click "New Collection"
+3. Try this request:
+   - URL: `https://jsonplaceholder.typicode.com/posts`
+   - Click "Send"
+4. See response in right panel 🎉
 
 ## Common Issues
 
-### Backend won't start
-- Check if MongoDB is running
-- Verify `.env` file exists in `backend/` folder
-- Try: `npm install` again
+| Problem | Fix |
+|---------|-----|
+| MongoDB connection error | Ensure MongoDB is running, check `backend/.env` |
+| Backend won't start | Run `pnpm install` in backend folder |
+| Frontend won't start | Delete `.next`, run `pnpm install` |
+| Port in use | Change `PORT` in `backend/.env` |
 
-### Frontend won't start
-- Delete `.next` folder
-- Try: `npm install` again
-- Check if port 3000 is available
+## Next Steps
 
-### Can't connect to backend
-- Make sure backend is running on port 5000
-- Visit https://api-testing-platform.onrender.com/health in browser (or http://localhost:5000/health for local development)
-- Should see: `{"status": "API Testing Backend is running"}`
-
-## Need Help?
-
-Check the main README.md for detailed documentation!
+- See [README.md](README.md) for full documentation
+- See [EXAMPLES.md](EXAMPLES.md) for API examples
