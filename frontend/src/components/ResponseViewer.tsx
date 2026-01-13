@@ -94,17 +94,6 @@ function ResponseViewer({ response, loading }: ResponseViewerProps) {
     return jsonString;
   }, [response]);
 
-  // Memoize raw JSON string
-  const rawJson = useMemo(() => {
-    if (!response) return '';
-    const jsonString = JSON.stringify(response, null, 2);
-    // Truncate very large raw responses
-    if (jsonString.length > 500000) {
-      return jsonString.substring(0, 500000) + '\n\n... [Response truncated for performance]';
-    }
-    return jsonString;
-  }, [response]);
-
   // Calculate response size for display
   const responseSize = useMemo(() => {
     if (!response?.data) return null;
