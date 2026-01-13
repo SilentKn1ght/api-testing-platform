@@ -9,9 +9,12 @@ const router = express.Router();
 router.get('/', cacheMiddleware(120000), async (req, res) => {
   try {
     const collections = await Collection.find()
-      .select('-requests') // Exclude requests to avoid N+1 query
+      .populate({
+        path: 'requests',
+        select: '_id name method url'
+      })
       .sort({ updatedAt: -1 })
-      .lean(); // Convert to plain JS objects for better performance
+      .lean();
     res.json(collections);
   } catch (error) {
     console.error('Error fetching collections:', error);

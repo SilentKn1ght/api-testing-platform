@@ -6,9 +6,22 @@ const { invalidateResourceCache } = require('../middleware/cache');
 const router = express.Router();
 
 // Get all requests (with caching for 2 minutes)
+// Optional query: ?collectionId=null or ?collectionId=<id>
 router.get('/', cacheMiddleware(120000), async (req, res) => {
   try {
-    const requests = await Request.find()
+    const { collectionId } = req.query;
+    let filter = {};
+    
+    if (collectionId === 'null') {
+      // Get standalone requests (no collectionId)
+      filter = { collectionId: null };
+    } else if (collectionId) {
+      // Get requests for specific collection
+      filter = { collectionId };
+    }
+    // else: no filter, get all requests
+
+    const requests = await Request.find(filter)
       .sort({ updatedAt: -1 })
       .lean(); // Convert to plain JS objects for better performance
     res.json(requests);

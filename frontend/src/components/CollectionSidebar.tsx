@@ -20,12 +20,31 @@ interface CollectionSidebarProps {
 
 function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [standaloneRequests, setStandaloneRequests] = useState<any[]>([]);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [expandedCollections, setExpandedCollections] = useLocalStorage<Record<string, boolean>>('expandedCollections', {});
   const [isCreating, setIsCreating] = useState(false);
+  const [showStandalone, setShowStandalone] = useLocalStorage<boolean>('showStandalone', true);
 
   useEffect(() => {
     fetchCollections();
+    fetchStandaloneRequests();
+  }, []);
+
+  const fetchStandaloneRequests = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/requests?collectionId=null`);
+      const data = await res.json();
+      
+      if (Array.isArray(data)) {
+        setStandaloneRequests(data);
+      } else {
+        setStandaloneRequests([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch standalone requests:', error);
+      setStandaloneRequests([]);
+    }
   }, []);
 
   const fetchCollections = useCallback(async () => {
@@ -72,6 +91,7 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       toast.success('Collection created!');
       // Invalidate cache by refetching
       fetchCollections();
+      fetchStandaloneRequests();
     } catch (error) {
       toast.error('Failed to create collection');
       console.error(error);
@@ -90,8 +110,35 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       toast.success('Collection deleted');
       // Invalidate cache by refetching
       fetchCollections();
+      fetchStandaloneRequests();
     } catch (error) {
       toast.error('Failed to delete collection');
+      console.error(error);
+    }
+  }, [collections, fetchCollections]);
+
+  const handleDeleteRequest = useCallback(async (requestId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/requests/${requestId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete request');
+      }
+      
+      // Update collections by removing the request
+      setCollections(collections.map(collection => ({
+        ...collection,
+        requests: collection.requests?.filter(r => r._id !== requestId) || []
+      })));
+      
+      toast.success('Request deleted');
+      // Refetch to sync with backend
+      fetchCollections();
+      fetchStandaloneRequests();
+    } catch (error) {
+      toast.error('Failed to delete request');
       console.error(error);
     }
   }, [collections, fetchCollections]);
@@ -189,13 +236,15 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
                     <p className="text-xs text-gray-500 p-2">No requests</p>
                   ) : (
                     collection.requests?.map((request) => (
-                      <button
+                      <div
                         key={request._id}
-                        onClick={() => onSelectRequest(request)}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-800 rounded text-sm transition"
+                        className="flex items-center justify-between px-3 py-2 hover:bg-gray-800 rounded text-sm transition group"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                        <button
+                          onClick={() => onSelectRequest(request)}
+                          className="flex-1 text-left flex items-center gap-2 min-w-0"
+                        >
+                          <span className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${
                             request.method === 'GET' ? 'bg-green-900/30 text-green-400' :
                             request.method === 'POST' ? 'bg-yellow-900/30 text-yellow-400' :
                             request.method === 'PUT' ? 'bg-blue-900/30 text-blue-400' :
@@ -205,14 +254,80 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
                             {request.method}
                           </span>
                           <span className="truncate">{request.name}</span>
-                        </div>
-                      </button>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!confirm(`Delete request "${request.name}"?`)) return;
+                            handleDeleteRequest(request._id);
+                          }}
+                          className="p-1 hover:bg-red-900/30 rounded text-red-400 hover:text-red-300 transition opacity-0 group-hover:opacity-100 flex-shrink-0"
+                          title="Delete request"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     ))
                   )}
                 </div>
               )}
             </div>
           ))
+        )}
+
+        {/* Standalone Requests Section */}
+        {standaloneRequests.length > 0 && (
+          <>
+            <div className="px-4 py-3 border-t border-gray-700 bg-gray-850">
+              <button
+                onClick={() => setShowStandalone(!showStandalone)}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition w-full"
+              >
+                <span className="text-gray-400">
+                  {showStandalone ? '▼' : '▶'}
+                </span>
+                <span>📌 Standalone APIs ({standaloneRequests.length})</span>
+              </button>
+            </div>
+
+            {showStandalone && (
+              <div className="px-4 py-2 space-y-1">
+                {standaloneRequests.map((request) => (
+                  <div
+                    key={request._id}
+                    className="flex items-center justify-between px-3 py-2 hover:bg-gray-700 rounded text-sm transition group"
+                  >
+                    <button
+                      onClick={() => onSelectRequest(request)}
+                      className="flex-1 text-left flex items-center gap-2 min-w-0"
+                    >
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${
+                        request.method === 'GET' ? 'bg-green-900/30 text-green-400' :
+                        request.method === 'POST' ? 'bg-yellow-900/30 text-yellow-400' :
+                        request.method === 'PUT' ? 'bg-blue-900/30 text-blue-400' :
+                        request.method === 'DELETE' ? 'bg-red-900/30 text-red-400' :
+                        'bg-gray-700 text-gray-300'
+                      }`}>
+                        {request.method}
+                      </span>
+                      <span className="truncate">{request.name}</span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!confirm(`Delete request "${request.name}"?`)) return;
+                        handleDeleteRequest(request._id);
+                      }}
+                      className="p-1 hover:bg-red-900/30 rounded text-red-400 hover:text-red-300 transition opacity-0 group-hover:opacity-100 flex-shrink-0"
+                      title="Delete request"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
