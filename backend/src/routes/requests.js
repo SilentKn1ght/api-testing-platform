@@ -11,22 +11,35 @@ router.get('/', cacheMiddleware(120000), async (req, res) => {
   try {
     const { collectionId } = req.query;
     let filter = {};
-    
+
     if (collectionId === 'null') {
-      // Get standalone requests (no collectionId)
-      filter = { collectionId: null };
+      // Only standalone requests
+      filter = { $or: [{ collectionId: null }, { collectionId: { $exists: false } }] };
     } else if (collectionId) {
-      // Get requests for specific collection
+      // Requests for a specific collection
       filter = { collectionId };
     }
-    // else: no filter, get all requests
+    // else: no filter, return all
 
     const requests = await Request.find(filter)
       .sort({ updatedAt: -1 })
-      .lean(); // Convert to plain JS objects for better performance
+      .lean();
     res.json(requests);
   } catch (error) {
     console.error('Error fetching requests:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get standalone requests explicitly
+router.get('/standalone', cacheMiddleware(120000), async (req, res) => {
+  try {
+    const requests = await Request.find({ $or: [{ collectionId: null }, { collectionId: { $exists: false } }] })
+      .sort({ updatedAt: -1 })
+      .lean();
+    res.json(requests);
+  } catch (error) {
+    console.error('Error fetching standalone requests:', error);
     res.status(500).json({ error: error.message });
   }
 });

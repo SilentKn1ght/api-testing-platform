@@ -33,7 +33,7 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
 
   const fetchStandaloneRequests = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/requests?collectionId=null`);
+      const res = await fetch(`${API_URL}/api/requests/standalone`);
       const data = await res.json();
       
       if (Array.isArray(data)) {
@@ -96,7 +96,7 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       toast.error('Failed to create collection');
       console.error(error);
     }
-  }, [collections, newCollectionName, fetchCollections]);
+  }, [collections, newCollectionName, fetchCollections, fetchStandaloneRequests]);
 
   const handleDeleteCollection = useCallback(async (id: string) => {
     if (!confirm('Are you sure you want to delete this collection?')) return;
@@ -115,7 +115,7 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       toast.error('Failed to delete collection');
       console.error(error);
     }
-  }, [collections, fetchCollections]);
+  }, [collections, fetchCollections, fetchStandaloneRequests]);
 
   const handleDeleteRequest = useCallback(async (requestId: string) => {
     try {
@@ -141,7 +141,7 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
       toast.error('Failed to delete request');
       console.error(error);
     }
-  }, [collections, fetchCollections]);
+  }, [collections, fetchCollections, fetchStandaloneRequests]);
 
   const toggleCollection = useCallback((id: string) => {
     setExpandedCollections({
