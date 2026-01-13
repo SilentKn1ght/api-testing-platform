@@ -72,8 +72,8 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const HOST = '127.0.0.1';
-console.log(`📋 Attempting to bind to ${HOST}:${PORT}`);
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+console.log(`📋 Attempting to bind to ${HOST}:${PORT} (NODE_ENV: ${process.env.NODE_ENV || 'development'})`);
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
