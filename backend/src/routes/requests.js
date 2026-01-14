@@ -21,10 +21,31 @@ router.get('/', cacheMiddleware(120000), async (req, res) => {
     }
     // else: no filter, return all
 
-    const requests = await Request.find(filter)
-      .sort({ updatedAt: -1 })
-      .lean();
-    res.json(requests);
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    // Execute query with pagination
+    const [requests, total] = await Promise.all([
+      Request.find(filter)
+        .select('name method url collectionId updatedAt createdAt') // Only essential fields for list
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Request.countDocuments(filter)
+    ]);
+
+    res.json({
+      data: requests,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error('Error fetching requests:', error);
     res.status(500).json({ error: error.message });
@@ -35,6 +56,7 @@ router.get('/', cacheMiddleware(120000), async (req, res) => {
 router.get('/standalone', cacheMiddleware(120000), async (req, res) => {
   try {
     const requests = await Request.find({ $or: [{ collectionId: null }, { collectionId: { $exists: false } }] })
+      .select('name method url updatedAt createdAt') // Only essential fields
       .sort({ updatedAt: -1 })
       .lean();
     res.json(requests);
@@ -170,6 +192,7 @@ router.delete('/:id', async (req, res) => {
 router.get('/collection/:collectionId', cacheMiddleware(120000), async (req, res) => {
   try {
     const requests = await Request.find({ collectionId: req.params.collectionId })
+      .select('name method url updatedAt createdAt auth') // Include auth for display
       .sort({ createdAt: -1 })
       .lean(); // Convert to plain JS objects for better performance
     res.json(requests);

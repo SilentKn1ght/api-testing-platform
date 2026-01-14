@@ -8,17 +8,41 @@ require('dotenv').config();
 
 const app = express();
 
+// Import query logger
+const { 
+  initializeQueryLogger, 
+  queryStatsMiddleware, 
+  startPeriodicStatsLogging 
+} = require('./middleware/queryLogger');
+
+// Initialize query performance logging
+initializeQueryLogger();
+
 // Middleware
 app.use(cors());
 app.use(compression()); // Enable gzip compression
 app.use(express.json({ limit: '50mb' }));
+app.use(queryStatsMiddleware); // Add query stats logging
 
-// Connect MongoDB
+// Connect MongoDB with optimized settings
 let mongoConnected = false;
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+  // Connection pool size for better concurrent query handling
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  // Socket timeout
+  socketTimeoutMS: 45000,
+  // Server selection timeout
+  serverSelectionTimeoutMS: 5000,
+  // Keep alive
+  keepAlive: true,
+  keepAliveInitialDelay: 300000
+})
   .then(() => {
     mongoConnected = true;
-    console.log('✅ MongoDB connected');
+    console.log('✅ MongoDB connected with optimized pool settings');
+    // Start periodic database stats logging
+    startPeriodicStatsLogging(30); // Log stats every 30 minutes
   })
   .catch(err => {
     console.error('❌ MongoDB error:', err.message);
@@ -32,6 +56,21 @@ app.get('/health', (req, res) => {
     database: mongoConnected ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
+});
+
+// Database statistics endpoint (development only)
+app.get('/api/db-stats', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ error: 'Endpoint not available in production' });
+  }
+  
+  try {
+    const { getDatabaseStats } = require('./middleware/queryLogger');
+    const stats = await getDatabaseStats();
+    res.json(stats || { error: 'Unable to fetch stats' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Routes

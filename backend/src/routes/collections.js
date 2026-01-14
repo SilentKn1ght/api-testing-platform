@@ -8,14 +8,36 @@ const router = express.Router();
 // Get all collections (with caching for 2 minutes)
 router.get('/', cacheMiddleware(120000), async (req, res) => {
   try {
-    const collections = await Collection.find()
-      .populate({
-        path: 'requests',
-        select: '_id name method url'
-      })
-      .sort({ updatedAt: -1 })
-      .lean();
-    res.json(collections);
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    // Execute query with pagination
+    const [collections, total] = await Promise.all([
+      Collection.find()
+        .select('name description requests createdAt updatedAt') // Only select needed fields
+        .populate({
+          path: 'requests',
+          select: '_id name method url updatedAt', // Minimal fields for list view
+          options: { sort: { updatedAt: -1 }, limit: 100 } // Limit populated requests
+        })
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(), // Convert to plain objects for performance
+      Collection.countDocuments()
+    ]);
+
+    res.json({
+      data: collections,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error('Error fetching collections:', error);
     res.status(500).json({ error: error.message });
@@ -53,7 +75,10 @@ router.post('/', async (req, res) => {
 router.get('/:id', cacheMiddleware(120000), async (req, res) => {
   try {
     const collection = await Collection.findById(req.params.id)
-      .populate('requests') // Populate requests for detail view
+      .populate({
+        path: 'requests',
+        options: { sort: { updatedAt: -1 } } // Sort populated requests
+      })
       .lean(); // Convert to plain JS objects for better performance
     
     if (!collection) {

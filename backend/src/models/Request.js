@@ -72,8 +72,15 @@ requestSchema.pre('save', function(next) {
 });
 
 // Indexes for performance
-requestSchema.index({ updatedAt: -1 });
-requestSchema.index({ collectionId: 1 });
-requestSchema.index({ name: 1 });
+// Compound index for collection-based queries with sorting
+requestSchema.index({ collectionId: 1, updatedAt: -1 });
+// Compound index for standalone requests (sparse to save space)
+requestSchema.index({ collectionId: 1, updatedAt: -1 }, { sparse: true });
+// Text index for searching requests by name and URL
+requestSchema.index({ name: 'text', url: 'text' });
+// Simple index for method filtering
+requestSchema.index({ method: 1 });
+// Compound index for common sorting pattern
+requestSchema.index({ updatedAt: -1, _id: 1 });
 
 module.exports = mongoose.model('Request', requestSchema);

@@ -31,7 +31,11 @@ collectionSchema.pre('save', function(next) {
 });
 
 // Indexes for performance
-collectionSchema.index({ updatedAt: -1 });
+// Compound index for common query patterns (sorting by updatedAt)
+collectionSchema.index({ updatedAt: -1, _id: 1 });
+// Text index for name searching
+collectionSchema.index({ name: 'text', description: 'text' });
+// Simple index for exact name lookups
 collectionSchema.index({ name: 1 });
 
 module.exports = mongoose.model('Collection', collectionSchema);
