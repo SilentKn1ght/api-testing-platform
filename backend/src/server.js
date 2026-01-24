@@ -33,10 +33,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   // Socket timeout
   socketTimeoutMS: 45000,
   // Server selection timeout
-  serverSelectionTimeoutMS: 5000,
-  // Keep alive
-  keepAlive: true,
-  keepAliveInitialDelay: 300000
+  serverSelectionTimeoutMS: 5000
 })
   .then(() => {
     mongoConnected = true;

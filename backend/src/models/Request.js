@@ -74,8 +74,6 @@ requestSchema.pre('save', function(next) {
 // Indexes for performance
 // Compound index for collection-based queries with sorting
 requestSchema.index({ collectionId: 1, updatedAt: -1 });
-// Compound index for standalone requests (sparse to save space)
-requestSchema.index({ collectionId: 1, updatedAt: -1 }, { sparse: true });
 // Text index for searching requests by name and URL
 requestSchema.index({ name: 'text', url: 'text' });
 // Simple index for method filtering

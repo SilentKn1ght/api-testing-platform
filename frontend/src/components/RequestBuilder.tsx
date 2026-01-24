@@ -47,11 +47,8 @@ function RequestBuilder({ request, onResponse, isLoading, setIsLoading }: Reques
     try {
       const res = await fetch(`${API_URL}/api/collections`);
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setCollections(data);
-      } else {
-        setCollections([]);
-      }
+      const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+      setCollections(list);
     } catch (error) {
       console.error('Failed to fetch collections:', error);
       setCollections([]);

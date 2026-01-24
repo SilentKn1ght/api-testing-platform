@@ -51,14 +51,12 @@ function CollectionSidebar({ onSelectRequest }: CollectionSidebarProps) {
     try {
       const res = await fetch(`${API_URL}/api/collections`);
       const data = await res.json();
-      
-      // Ensure data is an array before setting state
-      if (Array.isArray(data)) {
-        setCollections(data);
-      } else {
+      const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+      setCollections(list);
+
+      if (!Array.isArray(data?.data) && !Array.isArray(data)) {
         console.error('API returned non-array data:', data);
-        setCollections([]);
-        if (data.error) {
+        if (data?.error) {
           toast.error(`Failed to fetch collections: ${data.error}`);
         } else {
           toast.error('Failed to fetch collections: Invalid response format');
